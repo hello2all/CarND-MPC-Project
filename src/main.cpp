@@ -98,6 +98,16 @@ int main() {
           * Both are in between [-1, 1].
           *
           */
+          // convert std::vector to Eigen::VectorXd
+          Eigen::VectorXd ptsx_ = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(ptsx.data(), ptsx.size());
+          Eigen::VectorXd ptsy_ = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(ptsy.data(), ptsy.size());
+          auto coeffs = polyfit(ptsx_, ptsy_, 3);
+          
+
+          // double cte = polyeval(coeffs, x) - y;
+          // TODO: change to 3rd degree polynomial
+          // double epsi = psi - atan(coeffs[1]);
+
           double steer_value;
           double throttle_value;
 
