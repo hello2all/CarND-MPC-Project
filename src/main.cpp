@@ -92,39 +92,64 @@ int main() {
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
 
+          // DEBUG
+          // cout << "ptsx:" << endl;
+          // for (const auto i: ptsx)
+          //   cout << i << ' ';
+          // cout << endl;
+          // cout << "ptsy:" << endl;
+          // for (const auto i: ptsy)
+          //   cout << i << ' ';
+          // cout << endl;
           /*
           * Calculate steering angle and throttle using MPC.
           *
           * Both are in between [-1, 1].
           *
           */
-          // rotate coordinate system by 90 degrees to avoid more than 1 y value for a given x in poly line
+          // rotate coordinate system to vehicle coordinate
           for(int i = 0; i < ptsx.size(); i++){
             double shift_x = ptsx[i] - px;
-            double shift_y = ptsy[i] - py;
-
+            double shift_y = ptsy[i] -py;
             ptsx[i] = shift_x * cos(-psi) - shift_y * sin(-psi);
-            ptsy[i] = shift_y * sin(-psi) + shift_y * cos(-psi);
+            ptsy[i] = shift_x * sin(-psi) + shift_y * cos(-psi);
           }
           // convert std::vector to Eigen::VectorXd
           Eigen::VectorXd ptsx_ = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(ptsx.data(), ptsx.size());
           Eigen::VectorXd ptsy_ = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(ptsy.data(), ptsy.size());
+          // DEBUG
+          // cout << "ptsx:" << endl;
+          // for (const auto i: ptsx)
+          //   cout << i << ' ';
+          // cout << endl;
+          // cout << "ptsy:" << endl;
+          // for (const auto i: ptsy)
+          //   cout << i << ' ';
+          // cout << endl;
+          // cout << "ptsx:" << endl;
+          // cout << ptsx_ << endl;
+          // cout << "ptsy:" << endl;
+          // cout << ptsy_ << endl;
+
           auto coeffs = polyfit(ptsx_, ptsy_, 3);
           
           // estimate cte, can be improved
-          double cte = polyeval(coeffs, 0);
+          double cte = polyeval(coeffs, 0.0);
           // derivative of 3rd degree polynomial, y' where x = 0
           // double epsi = psi - atan(coeffs[1] + 2 * coeffs[2] * px + 3 * coeffs[3] * px * px);
           double epsi = -atan(coeffs[1]);
 
           Eigen::VectorXd state(6);
-          state << 0, 0, 0, v, cte, epsi;
+          state << px, py, psi, v, cte, epsi;
 
           // Solve MPC with initial state and coefficients
           auto vars = mpc.Solve(state, coeffs);
 
           // Debug:
-          
+          cout << "state: " << endl;
+          cout << state << endl;
+          // cout << "coeffs" << coeffs << endl;
+          // exit(0);
 
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
