@@ -24,16 +24,16 @@ double dt = 0.1;
 // This is the length from front to CoG that has a similar radius.
 const double Lf = 2.67;
 
-double ref_v = 40;
+double ref_v = 60;
 
 // Tunable parameters on costs
-const double w_state_cte = 300.0;
-const double w_state_epsi = 50.0;
+const double w_state_cte = 5000.0;
+const double w_state_epsi = 5000.0;
 const double w_state_v = 1.0;
-const double w_val_steering = 200.0;
-const double w_val_throttle = 50.0;  
-const double w_seq_steering = 5000.0;
-const double w_seq_throttle = 100.0;
+const double w_val_steering = 1.0;
+const double w_val_throttle = 1.0;  
+const double w_seq_steering = 20.0;
+const double w_seq_throttle = 10.0;
 
 // The solver takes all the state variables and actuator
 // variables in a singular vector. Thus, we should to establish
@@ -267,7 +267,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
 
   // Cost
   auto cost = solution.obj_value;
-  // std::cout << "Cost " << cost << std::endl;
+  std::cout << "Cost " << cost << std::endl;
 
   // TODO: Return the first actuator values. The variables can be accessed with
   // `solution.x[i]`.

@@ -77,7 +77,7 @@ int main() {
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
     string sdata = string(data).substr(0, length);
-    // cout << sdata << endl;
+    cout << sdata << endl;
     if (sdata.size() > 2 && sdata[0] == '4' && sdata[1] == '2') {
       string s = hasData(sdata);
       if (s != "") {
@@ -108,7 +108,7 @@ int main() {
           *
           */
           // rotate coordinate system to vehicle coordinate
-          for(int i = 0; i < ptsx.size(); i++){
+          for(size_t i = 0; i < ptsx.size(); i++){
             double shift_x = ptsx[i] - px;
             double shift_y = ptsy[i] -py;
             ptsx[i] = shift_x * cos(-psi) - shift_y * sin(-psi);
@@ -140,14 +140,14 @@ int main() {
           double epsi = -atan(coeffs[1]);
 
           Eigen::VectorXd state(6);
-          state << px, py, psi, v, cte, epsi;
+          state << 0, 0, 0, v, cte, epsi;
 
           // Solve MPC with initial state and coefficients
           auto vars = mpc.Solve(state, coeffs);
 
           // Debug:
-          cout << "state: " << endl;
-          cout << state << endl;
+          // cout << "state: " << endl;
+          // cout << state << endl;
           // cout << "coeffs" << coeffs << endl;
           // exit(0);
 
@@ -155,7 +155,8 @@ int main() {
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
           double Lf = 2.67;
-          double steer_value = vars[0] /(deg2rad(25) * Lf);
+          double steer_value = -vars[0] /(deg2rad(25) * Lf);
+          // double steer_value = - vars[0] / 0.436332;
           // cout << vars[0] << endl;
           double throttle_value = vars[1];
           msgJson["steering_angle"] = steer_value;
@@ -165,7 +166,7 @@ int main() {
           vector<double> mpc_x_vals;
           vector<double> mpc_y_vals;
 
-          for(int i = 2; i < vars.size(); i++){
+          for(size_t i = 2; i < vars.size(); i++){
             if(i % 2 == 0)
             {
               mpc_x_vals.push_back(vars[i]);
@@ -201,7 +202,7 @@ int main() {
 
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          // std::cout << msg << std::endl;
+          std::cout << msg << std::endl;
           // Latency
           // The purpose is to mimic real driving conditions where
           // the car does actuate the commands instantly.
