@@ -85,12 +85,15 @@ int main() {
         string event = j[0].get<string>();
         if (event == "telemetry") {
           // j[1] is the data JSON object
+          double Lf = 2.67;
           vector<double> ptsx = j[1]["ptsx"];
           vector<double> ptsy = j[1]["ptsy"];
           double px = j[1]["x"];
           double py = j[1]["y"];
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
+          double delta = j[1]["steering_angle"];
+          double acceleration = j[1]["throttle"];
 
           // DEBUG
           // cout << "ptsx:" << endl;
@@ -107,6 +110,13 @@ int main() {
           * Both are in between [-1, 1].
           *
           */
+          // incorporate 100ms latency
+          double latency = 0.1;
+          px = px + v * cos(psi) * latency;
+          py = py + v * sin(psi) * latency;
+          psi = psi - v * delta / Lf * latency;
+          v = v + acceleration * latency;
+
           // rotate coordinate system to vehicle coordinate
           for(size_t i = 0; i < ptsx.size(); i++){
             double shift_x = ptsx[i] - px;
@@ -154,7 +164,7 @@ int main() {
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
-          double Lf = 2.67;
+
           double steer_value = -vars[0] /(deg2rad(25) * Lf);
           // double steer_value = - vars[0] / 0.436332;
           // cout << vars[0] << endl;
