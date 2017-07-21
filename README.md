@@ -2,6 +2,68 @@
 Self-Driving Car Engineer Nanodegree Program
 
 ---
+## Implementation
+
+### The Model
+
+The controller uses vehicle kinematics model to predict vehicle movements in order to give control outputs. The model has four states which consist:
+
+| Variable  | Description |
+| ------------- | ------------- |
+| x  | x coordinate  |
+| y  | y coordinate  |
+| psi  | orientation angle  |
+| v  | velocity  |
+
+
+and two actuations
+
+| Variable  | Description |
+| ------------- | ------------- |
+| delta  | steering angle  |
+| a  | acceleration  |
+
+The state update is depicted by the formulation
+
+![kinetic](./footage/kinetic.png)
+
+In which Lf is the length from vehicle front wheel to center of gravity, used to convert steering angle to turning ratio.
+
+### Timestep Length and Elapsed Duration (N & dt)
+
+Timestep length and elapsed duration decide how far the optimizer look into the future. For this project, the values are set as
+
+N = 10
+dt = 0.1
+
+This value set yield stable performance. The further into the future requires more computation, this also holds true for dt. The model performs well till N = 25, dt = 0.05 with low speed, above which the optimizer fails to solve the optimization problem in time. 
+
+### Polynomial Fitting and MPC Preprocessing
+
+Sampled waypoints are utilized to guide the vehicle movement. These waypoints are first fitted to a 3rd degree polynomial, then transformed to the vehicle's coordinate system, finally passed to the optimizer to guide the vehicle actuators.
+
+The waypoint transformation is defined by
+
+![rotation matrix](./footage/rotation.png)
+
+In which (x, y) are waypoint coordinates, (xt, yt) are vehicle location coordinates. Through this transformation waypoints are transformed into vehicle coordinates.
+
+### Model Predictive Control with Latency
+
+With Model Predictive control, it is possible to predict vehicle state ahead in time, thus to compensate latency in control. 
+
+In this project, a future state (100ms later), calculated using the formulas above, is fed into the optimizer after coordinates transformation. This effectively simulates actuation delay in the simulator.
+
+The code for incorparating latency is given below:
+
+``` c++
+// incorporate 100ms latency
+double latency = 0.1;
+px = px + v * cos(psi) * latency;
+py = py + v * sin(psi) * latency;
+psi = psi - v * delta / Lf * latency;
+v = v + acceleration * latency;
+```
 
 ## Dependencies
 
